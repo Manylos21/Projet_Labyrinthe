@@ -30,13 +30,13 @@ def demander_difficulte():
             
         except ValueError :
             # Si l'utilisateur tape une lettre ou un mauvais chiffre, on gère l'erreur
-            print(f"\n[!] Saisie incorrecte : VEUILLEZ TAPER UNIQUEMENT 1, 2 OU 3.\n")
+            print("\n[!] Saisie incorrecte : VEUILLEZ TAPER UNIQUEMENT 1, 2 OU 3.\n")
 
 def main():
     choix_difficulte = demander_difficulte()
 
     if choix_difficulte == 3:
-        print("\nFermeture du jeu, À bientôt !")
+        print("\nFermeture du jeu, A bientôt !")
         return
     
     print("\nGénération du labyrinthe en cours...")
