@@ -1,41 +1,88 @@
-# generateurs.py
-
 import numpy as np
 import random
 
 class GenerateurLabyrinthe:
     def __init__(self, largeur, hauteur):
-        # Utilisation de NumPy pour initialiser la grille remplie de murs (1) [cite: 185]
         self.largeur = largeur
         self.hauteur = hauteur
         self.grille = np.ones((hauteur, largeur), dtype=int)
 
     def generer_backtracking(self):
-        """Génération avec l'algorithme de Backtracking (Recherche en profondeur)."""
+        """1er Algorithme : Backtracking (Longs couloirs)."""
         self.grille.fill(1) # Remplir de murs
-        
-        def creuser_passage(cx, cy):
-            directions = [(0, -2), (0, 2), (-2, 0), (2, 0)]
+
+        def creuser(y, x):
+            directions = [(-2, 0), (2, 0), (0, -2), (0, 2)]
             random.shuffle(directions)
             
-            for dx, dy in directions:
-                nx, ny = cx + dx, cy + dy
-                # Si la case de destination est dans les limites et est un mur
-                if 1 <= ny < self.hauteur-1 and 1 <= nx < self.largeur-1 and self.grille[ny, nx] == 1:
-                    self.grille[cy + dy//2, cx + dx//2] = 0 # Casse le mur entre les deux
-                    self.grille[ny, nx] = 0                 # Creuse la nouvelle cellule
-                    creuser_passage(nx, ny)
+            for dy, dx in directions:
+                nouvelle_y = y + dy
+                nouvelle_x = x + dx
+                
+                if 1 <= nouvelle_y < self.hauteur-1 and 1 <= nouvelle_x < self.largeur-1:
+                    if self.grille[nouvelle_y, nouvelle_x] == 1:
+                        self.grille[y + dy//2, x + dx//2] = 0
+                        self.grille[nouvelle_y, nouvelle_x] = 0
+                        creuser(nouvelle_y, nouvelle_x)
 
-        # Point de départ du creusage
         self.grille[1, 1] = 0
-        creuser_passage(1, 1)
-        
-        # Placement de l'entrée (2) et de la sortie (3)
-        self.grille[1, 1] = 2 
-        self.grille[self.hauteur-2, self.largeur-2] = 3 
+        creuser(1, 1)
+        self.rendre_imparfait(10) # On ajoute des boucles
+        self.placer_depart_arrivee()
         return self.grille
-        
+
     def generer_prim(self):
-        """Structure pour l'algorithme de Prim."""
-        # À développer si tu as le temps, sinon le Backtracking suffit amplement !
-        pass
+        """2ème Algorithme : Prim (Beaucoup de culs-de-sac)."""
+        self.grille.fill(1) # Remplir de murs
+        
+        # On commence en haut à gauche
+        y_depart, x_depart = 1, 1
+        self.grille[y_depart, x_depart] = 0
+        
+        # Liste pour stocker les murs qu'on peut potentiellement casser
+        murs = []
+        
+        # Fonction locale pour ajouter les murs adjacents à la liste
+        def ajouter_murs(y, x):
+            directions = [(-2, 0), (2, 0), (0, -2), (0, 2)]
+            for dy, dx in directions:
+                ny, nx = y + dy, x + dx
+                if 1 <= ny < self.hauteur-1 and 1 <= nx < self.largeur-1:
+                    if self.grille[ny, nx] == 1:
+                        murs.append((y, x, ny, nx)) # (Origine Y, Origine X, Cible Y, Cible X)
+
+        ajouter_murs(y_depart, x_depart)
+        
+        while murs:
+            # On choisit un mur au hasard dans la liste
+            index_mur = random.randint(0, len(murs) - 1)
+            y_orig, x_orig, y_cible, x_cible = murs.pop(index_mur)
+            
+            # Si la case derrière le mur n'a pas encore été visitée (c'est un 1)
+            if self.grille[y_cible, x_cible] == 1:
+                # On casse le mur entre les deux
+                self.grille[(y_orig + y_cible)//2, (x_orig + x_cible)//2] = 0
+                # On creuse la case cible
+                self.grille[y_cible, x_cible] = 0
+                
+                # On ajoute les nouveaux murs adjacents à notre liste
+                ajouter_murs(y_cible, x_cible)
+
+        self.rendre_imparfait(10) # Optionnel sur Prim, mais rend le jeu plus sympa
+        self.placer_depart_arrivee()
+        return self.grille
+
+    def rendre_imparfait(self, nombre_de_trous=10):
+        """Casse des murs au hasard pour créer des chemins multiples."""
+        trous_faits = 0
+        while trous_faits < nombre_de_trous:
+            y = random.randint(1, self.hauteur - 2)
+            x = random.randint(1, self.largeur - 2)
+            if self.grille[y, x] == 1:
+                self.grille[y, x] = 0
+                trous_faits += 1
+
+    def placer_depart_arrivee(self):
+        """Place l'entrée (2) et la sortie (3)."""
+        self.grille[1, 1] = 2 
+        self.grille[self.hauteur-2, self.largeur-2] = 3
