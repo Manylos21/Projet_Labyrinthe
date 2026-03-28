@@ -1,6 +1,7 @@
 # main.py
 
 from generateurs import GenerateurLabyrinthe
+import time
 from jeu import JeuLabyrinthe
 from utils_fichiers import sauvegarder_labyrinthe
 
@@ -30,7 +31,7 @@ def demander_difficulte():
             
         except ValueError :
             # Si l'utilisateur tape une lettre ou un mauvais chiffre, on gère l'erreur
-            print("\n[!] Saisie incorrecte : VEUILLEZ TAPER UNIQUEMENT 1, 2 OU 3.\n")
+            print(  "\n[!] Saisie incorrecte : VEUILLEZ TAPER UNIQUEMENT 1, 2 OU 3.\n")
 
 def main():
     choix_difficulte = demander_difficulte()
@@ -53,20 +54,41 @@ def main():
     
     jeu = JeuLabyrinthe(grille)
     etat = "Continue"
-    
-    while etat != "Gagné":
-        jeu.afficher()
-        choix = input("Déplacement (z=haut, s=bas, q=gauche, d=droite, quit=quitter) : ").lower()
-        
-        if choix == 'quit':
-            print("Partie abandonnée.")
-            break
-            
-        etat = jeu.deplacer(choix)
 
-    if etat == "Gagné":
-        jeu.afficher()
-        print("\nFÉLICITATIONS ! Tu as réussi a trouvé la sortie")
+    # --- DÉBUT DU CHRONOMÈTRE ---
+    temps_limite = 60 # Le joueur a 60 secondes pour sortir
+    debut_partie = time.time() # On enregistre l'heure exacte du début
+
+    try:
+        while etat != "Gagné":
+            # On calcule combien de temps s'est écoulé
+            temps_ecoule = time.time() - debut_partie
+            temps_restant = int(temps_limite - temps_ecoule)
+            
+            # Application directe de l'Exercice 2 du TP 1 !
+            if temps_restant <= 0:
+                raise TimeoutError("Le temps imparti est écoulé !")
+                
+            jeu.afficher()
+            print(f"⏳ Temps restant : {temps_restant} secondes ⏳")
+            choix = input("Déplacement (z=haut, s=bas, q=gauche, d=droite, quit=quitter) : ").lower()
+            
+            if choix == 'quit':
+                print("Partie abandonnée. À bientôt !")
+                break
+                
+            etat = jeu.deplacer(choix)
+        
+
+        if etat == "Gagné":
+            jeu.afficher()
+            print("\nFÉLICITATIONS ! Tu as réussi a trouvé la sortie (La chance du débutant)")
+
+    except TimeoutError as e:
+        # Si le temps est écoulé, l'erreur est attrapée ici (Game Over)
+        print("\n" * 2)
+        print(f"💀 GAME OVER : {e} 💀")
+        print("Le labyrinthe s'est refermé a jamais -RIP💀-")
 
 if __name__ == "__main__":
     main()
