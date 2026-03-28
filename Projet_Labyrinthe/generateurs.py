@@ -29,6 +29,7 @@ class GenerateurLabyrinthe:
         creuser(1, 1)
         self.rendre_imparfait(10) # On ajoute des boucles
         self.placer_depart_arrivee()
+        self.placer_pieges(10) # On place 10 pièges intelligents
         return self.grille
 
     def generer_prim(self):
@@ -86,3 +87,61 @@ class GenerateurLabyrinthe:
         """Place l'entrée (2) et la sortie (3)."""
         self.grille[1, 1] = 2 
         self.grille[self.hauteur-2, self.largeur-2] = 3
+    def trouver_chemin_principal(self):
+        """
+        Simule la résolution du labyrinthe pour trouver le chemin gagnant.
+        Retourne une liste contenant les coordonnées du bon chemin.
+        """
+        visites = set()
+        chemin_gagnant = []
+        
+        # On cherche depuis le départ (1,1) jusqu'à l'arrivée
+        y_arrivee, x_arrivee = self.hauteur - 2, self.largeur - 2
+
+        def explorer(y, x):
+            # Si on a trouvé la sortie
+            if y == y_arrivee and x == x_arrivee:
+                chemin_gagnant.append((y, x))
+                return True
+                
+            # Si on tape un mur, ou qu'on est déjà passé par là
+            if self.grille[y, x] == 1 or (y, x) in visites:
+                return False
+
+            # On marque la case comme visitée et on l'ajoute au chemin potentiel
+            visites.add((y, x))
+            chemin_gagnant.append((y, x))
+
+            # On essaie les 4 directions (Haut, Bas, Gauche, Droite) avec un pas de 1
+            directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            for dy, dx in directions:
+                if explorer(y + dy, x + dx):
+                    return True # Le bon chemin a été trouvé !
+
+            # Si aucune direction ne mène à la sortie, ce n'est pas le bon chemin
+            chemin_gagnant.pop()
+            return False
+
+        explorer(1, 1)
+        return chemin_gagnant
+
+    def placer_pieges(self, nombre_pieges=5):
+        """Place des pièges uniquement sur les mauvais chemins."""
+        # 1. On calcule le chemin intouchable
+        chemin_interdit = self.trouver_chemin_principal()
+        
+        pieges_places = 0
+        tentatives = 0 # Sécurité pour éviter une boucle infinie s'il n'y a plus de place
+        
+        while pieges_places < nombre_pieges and tentatives < 1000:
+            y = random.randint(1, self.hauteur - 2)
+            x = random.randint(1, self.largeur - 2)
+            tentatives += 1
+            
+            # On place un piège si : 
+            # - c'est un chemin vide (0)
+            # - ce n'est PAS sur le chemin gagnant
+            # - ce n'est pas sur le départ (2) ni l'arrivée (3)
+            if self.grille[y, x] == 0 and (y, x) not in chemin_interdit:
+                self.grille[y, x] = 5
+                pieges_places += 1
