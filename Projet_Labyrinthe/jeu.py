@@ -10,8 +10,8 @@ class JeuLabyrinthe:
         self.grille = grille
         self.hauteur, self.largeur = grille.shape
         # Trouver la position de départ (2)
-        pos_y, pos_x = np.where(self.grille == 2)
-        self.pos_joueur = [int(pos_y[0]), int(pos_x[0])]
+        pos_y, pos_x = np.where(self.grille == 2) # np.where peut trouver plusieurs positions : il renvoie donc deux listes (lignes et colonnes)
+        self.pos_joueur = [int(pos_y[0]), int(pos_x[0])] # On prend la première position trouvée et on transforme les valeurs NumPy en int classiques
 
     def afficher(self):
         print("\n" * 50) # Nettoie la console
@@ -69,6 +69,9 @@ class JeuLabyrinthe:
             # Petite pause de 2 secondes de penalité sur le timer 
             time.sleep(2) 
             
+            # Suppression du piege 
+            self.grille[nouvelle_y, nouvelle_x] = 0
+
             # On recherche les coordonnées du "Départ" (le chiffre 2 dans la grille Numpy)
             pos_y, pos_x = np.where(self.grille == 2)
             

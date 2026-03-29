@@ -5,11 +5,11 @@ class GenerateurLabyrinthe:
     def __init__(self, largeur, hauteur):
         self.largeur = largeur
         self.hauteur = hauteur
-        self.grille = np.ones((hauteur, largeur), dtype=int)
+        self.grille = np.ones((hauteur, largeur), dtype=int) # Initialise une matrice avec des 1 "ones"
 
     def generer_backtracking(self):
         """1er Algorithme : Backtracking (Longs couloirs)."""
-        self.grille.fill(1) # Remplir de murs
+        self.grille.fill(1) # Remplir avec des murs. Sécurité : déjà remplie de 1
 
         def creuser(y, x):
             directions = [(-2, 0), (2, 0), (0, -2), (0, 2)]
@@ -27,9 +27,9 @@ class GenerateurLabyrinthe:
 
         self.grille[1, 1] = 0
         creuser(1, 1)
-        self.rendre_imparfait(10) # On ajoute des boucles
+        self.rendre_imparfait(0.08) # On ajoute des boucles
         self.placer_depart_arrivee()
-        self.placer_pieges(10) # On place 10 pièges intelligents
+        self.placer_pieges(10) # On place 10 pièges 
         return self.grille
 
     def generer_prim(self):
@@ -69,24 +69,42 @@ class GenerateurLabyrinthe:
                 # On ajoute les nouveaux murs adjacents à notre liste
                 ajouter_murs(y_cible, x_cible)
 
-        self.rendre_imparfait(10) # Optionnel sur Prim, mais rend le jeu plus sympa
+        self.rendre_imparfait(0.08) # Optionnel sur Prim, mais rend le jeu plus sympa
         self.placer_depart_arrivee()
         return self.grille
 
-    def rendre_imparfait(self, nombre_de_trous=10):
-        """Casse des murs au hasard pour créer des chemins multiples."""
-        trous_faits = 0
-        while trous_faits < nombre_de_trous:
-            y = random.randint(1, self.hauteur - 2)
-            x = random.randint(1, self.largeur - 2)
-            if self.grille[y, x] == 1:
-                self.grille[y, x] = 0
-                trous_faits += 1
+    def rendre_imparfait(self, proba=0.08):
+        """Ajoute quelques ouvertures dans les murs pour créer plusieurs chemins."""
+        # On parcourt toute la grille (sans toucher aux bords extérieurs)
+        for y in range(1, self.hauteur - 1):
+            for x in range(1, self.largeur - 1):
+
+                # On ne travaille que sur les cases qui sont encore des murs
+                if self.grille[y, x] == 1:
+
+                    # CAS 1 : mur vertical
+                    # Si à gauche ET à droite il y a déjà des passages,
+                    # alors ce mur sépare deux couloirs horizontaux
+                    if self.grille[y, x-1] == 0 and self.grille[y, x+1] == 0:
+
+                        # On casse ce mur avec une certaine probabilité
+                        if random.random() < proba:
+                            self.grille[y, x] = 0
+
+                    # CAS 2 : mur horizontal
+                    # Si en haut ET en bas il y a déjà des passages,
+                    # alors ce mur sépare deux couloirs verticaux
+                    elif self.grille[y-1, x] == 0 and self.grille[y+1, x] == 0:
+
+                        # Même principe : on casse parfois le mur
+                        if random.random() < proba:
+                            self.grille[y, x] = 0
 
     def placer_depart_arrivee(self):
         """Place l'entrée (2) et la sortie (3)."""
         self.grille[1, 1] = 2 
         self.grille[self.hauteur-2, self.largeur-2] = 3
+
     def trouver_chemin_principal(self):
         """
         Simule la résolution du labyrinthe pour trouver le chemin gagnant.
@@ -126,22 +144,17 @@ class GenerateurLabyrinthe:
         return chemin_gagnant
 
     def placer_pieges(self, nombre_pieges=5):
-        """Place des pièges uniquement sur les mauvais chemins."""
-        # 1. On calcule le chemin intouchable
-        chemin_interdit = self.trouver_chemin_principal()
-        
+        """Place des pièges aléatoirement sur les cases libres."""
+
         pieges_places = 0
-        tentatives = 0 # Sécurité pour éviter une boucle infinie s'il n'y a plus de place
-        
+        tentatives = 0  # sécurité anti boucle infinie
+
         while pieges_places < nombre_pieges and tentatives < 1000:
             y = random.randint(1, self.hauteur - 2)
             x = random.randint(1, self.largeur - 2)
             tentatives += 1
-            
-            # On place un piège si : 
-            # - c'est un chemin vide (0)
-            # - ce n'est PAS sur le chemin gagnant
-            # - ce n'est pas sur le départ (2) ni l'arrivée (3)
-            if self.grille[y, x] == 0 and (y, x) not in chemin_interdit:
+
+            # On place seulement sur une case vide
+            if self.grille[y, x] == 0:
                 self.grille[y, x] = 5
                 pieges_places += 1
