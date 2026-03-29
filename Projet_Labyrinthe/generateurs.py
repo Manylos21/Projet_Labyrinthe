@@ -8,7 +8,7 @@ class GenerateurLabyrinthe:
         self.grille = np.ones((hauteur, largeur), dtype=int) # Initialise une matrice avec des 1 "ones"
 
     def generer_backtracking(self):
-        """1er Algorithme : Backtracking (Longs couloirs)."""
+        """1er Algorithme : Backtracking."""
         self.grille.fill(1) # Remplir avec des murs. Sécurité : déjà remplie de 1
 
         def creuser(y, x):
@@ -33,7 +33,7 @@ class GenerateurLabyrinthe:
         return self.grille
 
     def generer_prim(self):
-        """2ème Algorithme : Prim (Beaucoup de culs-de-sac)."""
+        """2ème Algorithme : Prim."""
         self.grille.fill(1) # Remplir de murs
         
         # On commence en haut à gauche
