@@ -9,20 +9,20 @@ class JeuLabyrinthe:
     def __init__(self, grille):
         self.grille = grille
         self.hauteur, self.largeur = grille.shape
-        # Trouver la position de départ (2)
-        pos_y, pos_x = np.where(self.grille == 2) # np.where peut trouver plusieurs positions : il renvoie donc deux listes (lignes et colonnes)
-        self.pos_joueur = [int(pos_y[0]), int(pos_x[0])] # On prend la première position trouvée et on transforme les valeurs NumPy en int classiques
+        # trouver la position de départ (2)
+        pos_y, pos_x = np.where(self.grille == 2) #  il renvoie deux listes (lignes et colonnes)
+        self.pos_joueur = [int(pos_y[0]), int(pos_x[0])] # On prend la première position trouvée et on transforme les valeurs numpy en int
 
     def afficher(self):
-        print("\n" * 50) # Nettoie la console
-        # Le dictionnaire 
+        print("\n" * 50) # nettoie la console
+        # Le dictionnaire des symboles
         symboles = {1: "██", 0: "  ", 2: "Dé", 3: "Fi", 4: "P ", 5: "><"}
         
         for y in range(self.hauteur):
             ligne_affichage = ""
             for x in range(self.largeur):
                 if [y, x] == self.pos_joueur:
-                    ligne_affichage += symboles[4] # Affiche le joueur
+                    ligne_affichage += symboles[4] # affiche le joueur (P)
                 else:
                     ligne_affichage += symboles[self.grille[y, x]]
             print(ligne_affichage)
@@ -58,10 +58,9 @@ class JeuLabyrinthe:
         except MouvementInvalideError as e:
             print(f"\n[!] Attention : {e}")
             loguer_erreur(e)
-            input("Appuyez sur Entrée pour continuer...")
+            input("Appuyez sur entrée pour continuer...")
 
         except PiegeError:
-            # ON DÉCLENCHE LE PIÈGE
             print("\n")
             print(" BOOM ! Tu as marché sur un piège (floko) ")
             print("🔄 Retour à la case départ... 🔄")
@@ -72,7 +71,7 @@ class JeuLabyrinthe:
             # Suppression du piege 
             self.grille[nouvelle_y, nouvelle_x] = 0
 
-            # On recherche les coordonnées du "Départ" (le chiffre 2 dans la grille Numpy)
+            # On recherche les coordonnées du Départ (le chiffre 2 dans la grille numpy)
             pos_y, pos_x = np.where(self.grille == 2)
             
             # On téléporte le joueur de force à ces coordonnées
