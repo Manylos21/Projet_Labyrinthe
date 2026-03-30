@@ -6,10 +6,7 @@ from jeu import JeuLabyrinthe
 from utils_fichiers import sauvegarder_labyrinthe
 
 def demander_difficulte():
-    """
-    Demande la difficulté à l'utilisateur.
-    Utilise un bloc try-except pour gérer les erreurs de saisie (ValueError).
-    """
+  
     while True:
         print("\n" + "="*40)
         print("    BIENVENUE DANS LE LABYRINTHE ")
@@ -20,7 +17,6 @@ def demander_difficulte():
         print("-" * 40)
         
         try:
-            # On demande un entier 
             choix = int(input("Choisissez votre difficulté (tapez 1, 2 ou 3) : "))
             
             # Si l'utilisateur tape un autre chiffre que 1 ou 2 ou 3
@@ -46,8 +42,10 @@ def main():
     # 2. On génère selon le choix
     if choix_difficulte == 1:
         grille = gen.generer_prim()
+        temps_limite = 120
     else:
         grille = gen.generer_backtracking()
+        temps_limite = 60
 
     # Sauvegarde la matrice dans un fichier txt (TP Fichiers)
     sauvegarder_labyrinthe(grille)
@@ -56,7 +54,6 @@ def main():
     etat = "Continue"
 
     # --- DÉBUT DU CHRONOMÈTRE ---
-    temps_limite = 60 # Le joueur a 60 secondes pour sortir
     debut_partie = time.time() # On enregistre l'heure exacte du début
 
     try:
@@ -85,10 +82,10 @@ def main():
             print("\nFÉLICITATIONS ! Tu as réussi a trouvé la sortie (La chance du débutant)")
 
     except TimeoutError as e:
-        # Si le temps est écoulé, l'erreur est attrapée ici (Game Over)
+        # Si le temps est écoulé (Game Over)
         print("\n" * 2)
         print(f"💀 GAME OVER : {e} 💀")
-        print("Le labyrinthe s'est refermé a jamais -RIP💀-")
+        print("Le labyrinthe s'est refermé a jamais sur vous (l'important c'est de participé -RIP💀-)")
 
 if __name__ == "__main__":
     main()
