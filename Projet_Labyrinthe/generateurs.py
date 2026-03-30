@@ -22,7 +22,7 @@ class GenerateurLabyrinthe:
                 
                 if 1 <= nouvelle_y < self.hauteur-1 and 1 <= nouvelle_x < self.largeur-1:
                     if self.grille[nouvelle_y, nouvelle_x] == 1:
-                        self.grille[y + dy//2, x + dx//2] = 0
+                        self.grille[y + dy//2, x + dx//2] = 0 # on fait la div entière pour transformer le mur qui sépare le nouveau couloir
                         self.grille[nouvelle_y, nouvelle_x] = 0
                         creuser(nouvelle_y, nouvelle_x)
 
@@ -35,7 +35,7 @@ class GenerateurLabyrinthe:
 
     def generer_prim(self):
         """2ème Algorithme : Prim."""
-        self.grille.fill(1) # Remplir de murs
+        self.grille.fill(1) # Remplir de murs pour s'assurer 
         
         # On commence en haut à gauche
         y_depart, x_depart = 1, 1
@@ -44,7 +44,7 @@ class GenerateurLabyrinthe:
         # Liste pour stocker les murs qu'on peut potentiellement casser
         murs = []
         
-        # Fonction locale pour ajouter les murs adjacents à la liste
+        # ajouter les murs adjacents à la liste
         def ajouter_murs(y, x):
             directions = [(-2, 0), (2, 0), (0, -2), (0, 2)]
             for dy, dx in directions:
@@ -57,7 +57,7 @@ class GenerateurLabyrinthe:
         
         while murs:
             # On choisit un mur au hasard dans la liste
-            index_mur = random.randint(0, len(murs) - 1)
+            index_mur = random.randint(0, len(murs) - 1)# ici pas de shuffle question de performance (trop de case a mélanger)
             y_orig, x_orig, y_cible, x_cible = murs.pop(index_mur)
             
             # Si la case derrière le mur n'a pas encore été visitée (c'est un 1)
@@ -70,12 +70,12 @@ class GenerateurLabyrinthe:
                 # On ajoute les nouveaux murs adjacents à notre liste
                 ajouter_murs(y_cible, x_cible)
 
-        self.rendre_imparfait(0.08) # Optionnel sur Prim, mais rend le jeu plus sympa
+        self.rendre_imparfait(0.08) 
         self.placer_depart_arrivee()
         return self.grille
 
     def rendre_imparfait(self, proba=0.08):
-        """Ajoute quelques ouvertures dans les murs pour créer plusieurs chemins."""
+    
         # On parcourt toute la grille (sans toucher aux bords extérieurs)
         for y in range(1, self.hauteur - 1):
             for x in range(1, self.largeur - 1):
@@ -102,15 +102,12 @@ class GenerateurLabyrinthe:
                             self.grille[y, x] = 0
 
     def placer_depart_arrivee(self):
-        """Place l'entrée (2) et la sortie (3)."""
+        
         self.grille[1, 1] = 2 
         self.grille[self.hauteur-2, self.largeur-2] = 3
 
     def trouver_chemin_principal(self):
-        """
-        Simule la résolution du labyrinthe pour trouver le chemin gagnant.
-        Retourne une liste contenant les coordonnées du bon chemin.
-        """
+         # Simule la résolution rapide du labyrinthe
         visites = set()
         chemin_gagnant = []
         
@@ -145,8 +142,8 @@ class GenerateurLabyrinthe:
         return chemin_gagnant
 
     def placer_pieges(self, nombre_pieges=5):
-        """Place des pièges aléatoirement sur les cases libres."""
-
+         # place les piéges aléatoirement sur des cases vide
+        chemin_interdit = self.trouver_chemin_principal()
         pieges_places = 0
         tentatives = 0  # sécurité anti boucle infinie
 
@@ -155,7 +152,7 @@ class GenerateurLabyrinthe:
             x = random.randint(1, self.largeur - 2)
             tentatives += 1
 
-            # On place seulement sur une case vide
-            if self.grille[y, x] == 0:
+            # On place seulement sur une case vide et sur les cases qui ne méne pas vers la sortie
+            if self.grille[y, x] == 0 and (y, x) not in chemin_interdit:
                 self.grille[y, x] = 5
                 pieges_places += 1
