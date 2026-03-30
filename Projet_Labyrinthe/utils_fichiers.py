@@ -10,9 +10,8 @@ def loguer_erreur(exception):
         f.write(f"[{timestamp}] ERREUR ({type(exception).__name__}) : {str(exception)}\n")
 
 def sauvegarder_labyrinthe(grille, nom_fichier="data/dernier_labyrinthe.txt"):
-    """Sauvegarde la grille NumPy dans un fichier texte."""
     os.makedirs("data", exist_ok=True)
-    with open(nom_fichier, "w", encoding="utf-8") as f:
+    with open(nom_fichier, "w") as f:
         for ligne in grille:
             # Convertit chaque ligne du tableau en chaîne de caractères
             f.write("".join(str(cell) for cell in ligne) + "\n")
