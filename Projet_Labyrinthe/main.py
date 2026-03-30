@@ -1,5 +1,3 @@
-# main.py
-
 from generateurs import GenerateurLabyrinthe
 import time
 from jeu import JeuLabyrinthe
