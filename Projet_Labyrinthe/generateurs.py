@@ -13,7 +13,8 @@ class GenerateurLabyrinthe:
 
         def creuser(y, x):
             directions = [(-2, 0), (2, 0), (0, -2), (0, 2)]
-            random.shuffle(directions)
+            random.shuffle(directions)# shufle aide a bien mélanger pour que ça soit vraiment aléatoire
+
             
             for dy, dx in directions:
                 nouvelle_y = y + dy
