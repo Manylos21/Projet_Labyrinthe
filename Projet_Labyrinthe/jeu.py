@@ -1,5 +1,3 @@
-# jeu.py
-
 import time
 import numpy as np
 from exceptions import MouvementInvalideError, PiegeError
